@@ -20,7 +20,7 @@ async def cmd_help(message: types.Message):
 @dp.message(Command("weather_now"))
 async def send_weather(message: types.Message):
     city = "Krasnodar"
-    
+
     url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={WEATHER_API_KEY}&units=metric&lang=ru"
 
     try:
