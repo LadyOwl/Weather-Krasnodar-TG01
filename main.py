@@ -2,9 +2,11 @@ import asyncio
 import urllib.request
 import json
 import os
+import time
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import Command
 from config import BOT_TOKEN, WEATHER_API_KEY
+from gtts import gTTS
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
@@ -27,7 +29,6 @@ async def cmd_help(message: types.Message):
 @dp.message(Command("weather_now"))
 async def send_weather(message: types.Message):
     city = "Krasnodar"
-    # Исправлена ссылка (убраны лишние пробелы)
     url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={WEATHER_API_KEY}&units=metric&lang=ru"
 
     try:
@@ -37,31 +38,41 @@ async def send_weather(message: types.Message):
         temp = data["main"]["temp"]
         description = data["weather"][0]["description"]
 
+        # Текст для ответа
         weather_text = f"🌤 Погода в Краснодаре:\nТемпература: {temp}°C\nУсловия: {description}"
+
+        # Отправляем текст
         await message.answer(weather_text)
+
+        # Генерируем голосовое сообщение
+        voice_text = f"Погода в Краснодаре. Температура: {temp} градусов Цельсия. Условия: {description}."
+        tts = gTTS(text=voice_text, lang='ru')
+
+        # Уникальное имя файла
+        filename = f"voice_{int(time.time())}.mp3"
+        tts.save(filename)
+
+        # Отправляем как голосовое сообщение
+        with open(filename, 'rb') as voice:
+            await message.answer_voice(voice)
+
+        # Удаляем временный файл
+        os.remove(filename)
 
     except Exception as e:
         print(f"Ошибка: {e}")
         await message.answer("Ошибка получения данных о погоде.")
 
 
-# Обработчик фото
 @dp.message(F.photo)
 async def save_photo(message: types.Message):
     try:
-        # Берем фото в максимальном качестве (последнее в списке)
         photo = message.photo[-1]
-
-        # Скачиваем файл
         file = await bot.get_file(photo.file_id)
         file_path = file.file_path
-
-        # Уникальное имя файла
-        import time
         filename = f"img/photo_{int(time.time())}.jpg"
 
         await bot.download_file(file_path, filename)
-
         await message.answer("✅ Фото сохранено в папку img/")
 
     except Exception as e:
