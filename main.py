@@ -5,13 +5,13 @@ import os
 import time
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import Command
+from aiogram.types import FSInputFile  # ✅ Добавлено
 from config import BOT_TOKEN, WEATHER_API_KEY
 from gtts import gTTS
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
-# Создаем папку для фото, если нет
 os.makedirs("img", exist_ok=True)
 
 
@@ -38,29 +38,28 @@ async def send_weather(message: types.Message):
         temp = data["main"]["temp"]
         description = data["weather"][0]["description"]
 
-        # Текст для ответа
+        # 📝 Текстовый ответ
         weather_text = f"🌤 Погода в Краснодаре:\nТемпература: {temp}°C\nУсловия: {description}"
         await message.answer(weather_text)
 
-        # Генерируем голосовое сообщение
+        # 🎤 Голосовое сообщение
         voice_text = f"Погода в Краснодаре. Температура: {temp} градусов Цельсия. Условия: {description}."
 
         try:
             tts = gTTS(text=voice_text, lang='ru')
             filename = f"voice_{int(time.time())}.mp3"
             tts.save(filename)
-            print(f"✅ Файл создан: {filename}")
 
-            with open(filename, 'rb') as voice:
-                await message.answer_voice(voice)
-            print("✅ Голосовое отправлено")
+            
+            voice = FSInputFile(filename)
+            await message.answer_voice(voice)
 
             os.remove(filename)
-            print(f"✅ Файл удален: {filename}")
+            print("✅ Голосовое отправлено и файл удалён")
 
         except Exception as voice_error:
             print(f"❌ Ошибка голоса: {voice_error}")
-            await message.answer(f"Текст: {voice_text}")
+            await message.answer(f"🗣 Текст: {voice_text}")
 
     except Exception as e:
         print(f"❌ Ошибка погоды: {e}")
@@ -84,6 +83,7 @@ async def save_photo(message: types.Message):
 
 
 async def main():
+    print("🤖 Бот запущен...")
     await dp.start_polling(bot)
 
 
