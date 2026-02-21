@@ -40,27 +40,30 @@ async def send_weather(message: types.Message):
 
         # Текст для ответа
         weather_text = f"🌤 Погода в Краснодаре:\nТемпература: {temp}°C\nУсловия: {description}"
-
-        # Отправляем текст
         await message.answer(weather_text)
 
         # Генерируем голосовое сообщение
         voice_text = f"Погода в Краснодаре. Температура: {temp} градусов Цельсия. Условия: {description}."
-        tts = gTTS(text=voice_text, lang='ru')
 
-        # Уникальное имя файла
-        filename = f"voice_{int(time.time())}.mp3"
-        tts.save(filename)
+        try:
+            tts = gTTS(text=voice_text, lang='ru')
+            filename = f"voice_{int(time.time())}.mp3"
+            tts.save(filename)
+            print(f"✅ Файл создан: {filename}")
 
-        # Отправляем как голосовое сообщение
-        with open(filename, 'rb') as voice:
-            await message.answer_voice(voice)
+            with open(filename, 'rb') as voice:
+                await message.answer_voice(voice)
+            print("✅ Голосовое отправлено")
 
-        # Удаляем временный файл
-        os.remove(filename)
+            os.remove(filename)
+            print(f"✅ Файл удален: {filename}")
+
+        except Exception as voice_error:
+            print(f"❌ Ошибка голоса: {voice_error}")
+            await message.answer(f"Текст: {voice_text}")
 
     except Exception as e:
-        print(f"Ошибка: {e}")
+        print(f"❌ Ошибка погоды: {e}")
         await message.answer("Ошибка получения данных о погоде.")
 
 
