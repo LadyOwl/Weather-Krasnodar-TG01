@@ -1,2 +1,3 @@
 aiogram
 gtts
+deep-translator
