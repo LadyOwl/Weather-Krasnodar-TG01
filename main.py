@@ -7,7 +7,12 @@ from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import Command
 from aiogram.types import FSInputFile
 from config import BOT_TOKEN, WEATHER_API_KEY
-from keyboards import get_start_keyboard, get_links_keyboard
+from keyboards import (
+    get_start_keyboard,
+    get_links_keyboard,
+    get_dynamic_keyboard_start,
+    get_dynamic_keyboard_options
+)
 from gtts import gTTS
 from deep_translator import GoogleTranslator
 
@@ -47,6 +52,50 @@ async def cmd_links(message: types.Message):
     await message.answer("Выберите раздел:", reply_markup=keyboard)
 
 
+# Команда /dynamic с динамической клавиатурой
+@dp.message(Command("dynamic"))
+async def cmd_dynamic(message: types.Message):
+    keyboard = get_dynamic_keyboard_start()
+    await message.answer("Нажмите кнопку, чтобы увидеть больше:", reply_markup=keyboard)
+
+
+# Обработчик кнопки "Показать больше"
+@dp.callback_query(F.data == "btn_show_more")
+async def btn_show_more(callback: types.CallbackQuery):
+    keyboard = get_dynamic_keyboard_options()
+    await callback.message.edit_reply_markup(reply_markup=keyboard)
+    await callback.answer()
+
+
+# Обработчик "Опция 1" - Узнать о боте
+@dp.callback_query(F.data == "btn_option_1")
+async def btn_option_1(callback: types.CallbackQuery):
+    text = (
+        "🤖 **О боте WeatherKrasnodar**\n\n"
+        "Я умею:\n"
+        "• Показывать погоду в Краснодаре 🌤\n"
+        "• Переводить текст на английский 🌐\n"
+        "• Сохранять ваши фото 📷\n"
+        "• Отправлять голосовые сообщения 🎤\n\n"
+        "Создан с помощью Python и aiogram!"
+    )
+    await callback.message.answer(text)
+    await callback.answer()
+
+
+# Обработчик "Опция 2" - Контакты разработчика
+@dp.callback_query(F.data == "btn_option_2")
+async def btn_option_2(callback: types.CallbackQuery):
+    text = (
+        "👨‍💻 **Контакты разработчика**\n\n"
+        "Telegram: @your_username\n"
+        "Email: your_email@example.com\n\n"
+        "По вопросам и предложениям пишите смело!"
+    )
+    await callback.message.answer(text)
+    await callback.answer()
+
+
 # Команда /help
 @dp.message(Command("help"))
 async def cmd_help(message: types.Message):
@@ -55,6 +104,7 @@ async def cmd_help(message: types.Message):
         "/weather_now - запрос погоды в Краснодаре\n"
         "/translate - перевести текст на английский\n"
         "/links - полезные ссылки\n"
+        "/dynamic - динамическое меню\n"
         "/start - приветствие\n"
         "/help - все доступные команды бота\n\n"
         "📝 Также я автоматически перевожу любой текст, который ты мне напишешь!"
