@@ -88,8 +88,8 @@ async def btn_option_1(callback: types.CallbackQuery):
 async def btn_option_2(callback: types.CallbackQuery):
     text = (
         "👨‍💻 **Контакты разработчика**\n\n"
-        "Telegram: @your_username\n"
-        "Email: your_email@example.com\n\n"
+        "Telegram: @Special_AIContent\n"
+        "Email: sixquestions666@gmail.com\n\n"
         "По вопросам и предложениям пишите смело!"
     )
     await callback.message.answer(text)
