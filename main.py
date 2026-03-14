@@ -5,7 +5,7 @@ import os
 import time
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import Command
-from aiogram.types import FSInputFile
+from aiogram.types import FSInputFile, InlineKeyboardButton, InlineKeyboardMarkup
 from config import BOT_TOKEN, WEATHER_API_KEY
 from gtts import gTTS
 from deep_translator import GoogleTranslator
@@ -16,10 +16,32 @@ dp = Dispatcher()
 os.makedirs("img", exist_ok=True)
 
 
-# Команда /start
+# Команда /start с кнопками
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
-    await message.answer("Привет! Я покажу какая погода сейчас в Краснодаре😍")
+    # Создаем кнопки
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Привет", callback_data="btn_hello")],
+        [InlineKeyboardButton(text="Пока", callback_data="btn_bye")]
+    ])
+
+    await message.answer("Выберите кнопку:", reply_markup=keyboard)
+
+
+# Обработчик кнопки "Привет"
+@dp.callback_query(F.data == "btn_hello")
+async def btn_hello(callback: types.CallbackQuery):
+    user_name = callback.from_user.first_name
+    await callback.message.answer(f"Привет, {user_name}!")
+    await callback.answer()
+
+
+# Обработчик кнопки "Пока"
+@dp.callback_query(F.data == "btn_bye")
+async def btn_bye(callback: types.CallbackQuery):
+    user_name = callback.from_user.first_name
+    await callback.message.answer(f"До свидания, {user_name}!")
+    await callback.answer()
 
 
 # Команда /help
@@ -49,11 +71,9 @@ async def send_weather(message: types.Message):
         temp = data["main"]["temp"]
         description = data["weather"][0]["description"]
 
-        # 📝 Текстовый ответ
         weather_text = f"🌤 Погода в Краснодаре:\nТемпература: {temp}°C\nУсловия: {description}"
         await message.answer(weather_text)
 
-        # 🎤 Голосовое сообщение
         voice_text = f"Погода в Краснодаре. Температура: {temp} градусов Цельсия. Условия: {description}."
 
         try:
@@ -92,20 +112,15 @@ async def cmd_translate(message: types.Message):
 # 🌐 Обработчик текста - перевод на английский
 @dp.message(F.text)
 async def translate_text(message: types.Message):
-    # Игнорируем команды
     if message.text.startswith('/'):
         return
 
     try:
         original_text = message.text
-
-        # Перевод на английский
         translator = GoogleTranslator(source='auto', target='en')
         translated_text = translator.translate(original_text)
 
-        # Отправляем перевод
         await message.answer(f"🇬🇧 Перевод:\n\n{translated_text}")
-
         print(f"📝 Переведено: {original_text} → {translated_text}")
 
     except Exception as e:
