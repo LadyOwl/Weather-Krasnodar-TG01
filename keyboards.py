@@ -13,8 +13,8 @@ def get_start_keyboard():
 # Кнопки для команды /links
 def get_links_keyboard():
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="📰 Новости", url="ВСТАВЬ_ССЫЛКУ_НА_НОВОСТИ")],
-        [InlineKeyboardButton(text="🎵 Музыка", url="ВСТАВЬ_ССЫЛКУ_НА_МУЗЫКУ")],
-        [InlineKeyboardButton(text="🎬 Видео", url="ВСТАВЬ_ССЫЛКУ_НА_ВИДЕО")]
+        [InlineKeyboardButton(text="📰 Новости", url="https://russian.rt.com/")],
+        [InlineKeyboardButton(text="🎵 Музыка", url="https://europaplus.ru/")],
+        [InlineKeyboardButton(text="🎬 Видео", url="https://vkvideo.ru/")]
     ])
     return keyboard
