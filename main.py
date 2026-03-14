@@ -5,8 +5,9 @@ import os
 import time
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import Command
-from aiogram.types import FSInputFile, InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import FSInputFile
 from config import BOT_TOKEN, WEATHER_API_KEY
+from keyboards import get_start_keyboard, get_links_keyboard
 from gtts import gTTS
 from deep_translator import GoogleTranslator
 
@@ -19,12 +20,7 @@ os.makedirs("img", exist_ok=True)
 # Команда /start с кнопками
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
-    # Создаем кнопки
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Привет", callback_data="btn_hello")],
-        [InlineKeyboardButton(text="Пока", callback_data="btn_bye")]
-    ])
-
+    keyboard = get_start_keyboard()
     await message.answer("Выберите кнопку:", reply_markup=keyboard)
 
 
@@ -44,6 +40,13 @@ async def btn_bye(callback: types.CallbackQuery):
     await callback.answer()
 
 
+# Команда /links с URL-кнопками
+@dp.message(Command("links"))
+async def cmd_links(message: types.Message):
+    keyboard = get_links_keyboard()
+    await message.answer("Выберите раздел:", reply_markup=keyboard)
+
+
 # Команда /help
 @dp.message(Command("help"))
 async def cmd_help(message: types.Message):
@@ -51,6 +54,7 @@ async def cmd_help(message: types.Message):
         "Доступные команды:\n"
         "/weather_now - запрос погоды в Краснодаре\n"
         "/translate - перевести текст на английский\n"
+        "/links - полезные ссылки\n"
         "/start - приветствие\n"
         "/help - все доступные команды бота\n\n"
         "📝 Также я автоматически перевожу любой текст, который ты мне напишешь!"
